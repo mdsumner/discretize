@@ -4,7 +4,7 @@
 \alias{discretize}
 \title{Discretize badly}
 \usage{
-discretize(x, ...)
+discretize(x, ..., draw = TRUE)
 }
 \arguments{
 \item{x}{object decomposable to segments}

@@ -13,9 +13,14 @@
 #' sc <- SC(inlandwaters)
 #' x <- filter(sc, object_ == sample(sc$object$object_, 1))
 #' discretize(x)
-discretize <- function(x, ...) {
+discretize <- function(x, nrow = 50, ncol = 30, ..., draw = TRUE) {
   p <- silicate::SC0(x)
-  r <- raster::raster(raster::extent(range(p$vertex$x_), range(p$vertex$y_)), nrow = 150, ncol = 150)
+  r <- raster::raster(raster::extent(range(p$vertex$x_), range(p$vertex$y_)),
+                      nrow = nrow, ncol = ncol)
+  if (draw && raster::ncell(r) > 5e5) {
+    warning("we aren't going to draw this")
+    draw <- FALSE
+  }
   polyi <- sample(1:nrow(p$object), 1)
   idx <- as.matrix(p$object$topology_[[polyi]][c(".vx0", ".vx1")])
 
@@ -51,9 +56,10 @@ discretize <- function(x, ...) {
   col_xs <- xFromCol(r, seq_len(ncol(r))) - res(r)[1]/2
 
 
-  plot(p)
+  if (draw) plot(p)
   resy <- res(r)[2L]
   resx <- res(r)[1L]
+  nfill <- 0
   for (irow in seq_along(row_ys)) {
     active <- edges[,".y0"] >= row_ys[irow] & edges[,".y1"] < row_ys[irow]
     if (any(active)) {
@@ -67,8 +73,11 @@ discretize <- function(x, ...) {
 
       fill <- matrix(findInterval(sort(xx), col_xs),
                      ncol = 2, byrow = TRUE)
-      draw_fill(col_xs, fill, row_ys[irow])
+      nfill <- nfill + dim(fill)[1L]
+      if (draw) draw_fill(col_xs, fill, row_ys[irow])
     }
   }
+ cat(sprintf("scanned %i lines\n", irow))
+  cat(sprintf("produced %i fill bands\n", nfill))
   invisible("ha ha nothing")
 }
