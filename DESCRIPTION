@@ -1,0 +1,15 @@
+Package: dicretize
+Title: What 'fasterize' Does, Badly
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Michael D.",
+           family = "Sumner",
+           role = c("aut", "cre"),
+           email = "mdsumner@gmail.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Rasterizes really terribly.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.0
