@@ -9,16 +9,14 @@
 #'
 #' @examples
 #' library(raster)
-#' x <- silicate::inlandwaters[sample(1:nrow(silicate::inlandwaters), 1), ]
-#' if (runif(1) < 0.4) {
-#'   x <- sf::st_cast(x, "POLYGON")
-#'   x <- x[sample(nrow(x), 1), ]
-#' }
+#' library(silicate)
+#' sc <- SC(inlandwaters)
+#' x <- filter(sc, object_ == sample(sc$object$object_, 1))
 #' discretize(x)
 discretize <- function(x, ...) {
   p <- silicate::SC0(x)
-  r <- raster::raster(spex::spex(x), nrow = 150, ncol = 150)
-  polyi <- 1
+  r <- raster::raster(raster::extent(range(p$vertex$x_), range(p$vertex$y_)), nrow = 150, ncol = 150)
+  polyi <- sample(1:nrow(p$object), 1)
   idx <- as.matrix(p$object$topology_[[polyi]][c(".vx0", ".vx1")])
 
   xx <- cbind(p$vertex$x_[idx[,1]],
