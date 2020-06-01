@@ -1,4 +1,4 @@
-#' Discretize badly
+#' Discretize, not too badly
 #'
 #' Low memory and low performance and error-prone version of fasterize.
 #' @param x object decomposable to segments
@@ -6,24 +6,29 @@
 #'
 #' @return haha nothing
 #' @export
-#'
+#' @importFrom raster extent raster res yFromRow xFromCol
+#' @importFrom dplyr arrange
+#' @importFrom tibble as_tibble
 #' @examples
 #' library(raster)
 #' library(silicate)
 #' sc <- SC(inlandwaters)
-#' x <- filter(sc, object_ == sample(sc$object$object_, 1))
-#' discretize(x)
+#' x <- sc #filter(sc, object_ == sample(sc$object$object_, 3))
+#' discretize(x, 1500, 1300)
+#'
+#'
+#' discretize(SC0(minimal_mesh), 550, 550)
 discretize <- function(x, nrow = 50, ncol = 30, ..., draw = TRUE) {
   p <- silicate::SC0(x)
   r <- raster::raster(raster::extent(range(p$vertex$x_), range(p$vertex$y_)),
                       nrow = nrow, ncol = ncol)
-  if (draw && raster::ncell(r) > 5e5) {
+  if (draw && raster::ncell(r) > 5e6) {
     warning("we aren't going to draw this")
     draw <- FALSE
   }
-  polyi <- sample(1:nrow(p$object), 1)
-  idx <- as.matrix(p$object$topology_[[polyi]][c(".vx0", ".vx1")])
-
+#  polyi <- sample(1:nrow(p$object), 1)
+#  idx <- as.matrix(p$object$topology_[[polyi]][c(".vx0", ".vx1")])
+idx <- as.matrix(do.call(rbind, p$object$topology_)[c(".vx0", ".vx1")])
   xx <- cbind(p$vertex$x_[idx[,1]],
               p$vertex$x_[idx[,2]])
   yy <- cbind(p$vertex$y_[idx[,1]],
@@ -51,14 +56,13 @@ discretize <- function(x, nrow = 50, ncol = 30, ..., draw = TRUE) {
                  slope = (edges[,".y1"] - edges[,".y0"]) /
                    (edges[,".x1"] - edges[,".x0"]))
   edges[!is.finite(edges[, "slope"]), "slope"] <- 0
+  resy <- raster::res(r)[2L]
+  resx <- raster::res(r)[1L]
 
-  row_ys <- yFromRow(r, seq_len(nrow(r))) + res(r)[2]/2
-  col_xs <- xFromCol(r, seq_len(ncol(r))) - res(r)[1]/2
+  row_ys <- raster::yFromRow(r, seq_len(nrow(r))) + resy/2
+  col_xs <- raster::xFromCol(r, seq_len(ncol(r))) - resx/2
 
-
-  if (draw) plot(p)
-  resy <- res(r)[2L]
-  resx <- res(r)[1L]
+  if (draw) plot(p$vertex$x_, p$vertex$y_, asp = 1, pch = ".")
   nfill <- 0
   for (irow in seq_along(row_ys)) {
     active <- edges[,".y0"] >= row_ys[irow] & edges[,".y1"] < row_ys[irow]
@@ -77,6 +81,8 @@ discretize <- function(x, nrow = 50, ncol = 30, ..., draw = TRUE) {
       if (draw) draw_fill(col_xs, fill, row_ys[irow])
     }
   }
+#  abline(h = row_ys, v = col_xs)
+
  cat(sprintf("scanned %i lines\n", irow))
   cat(sprintf("produced %i fill bands\n", nfill))
   invisible("ha ha nothing")

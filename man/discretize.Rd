@@ -2,9 +2,9 @@
 % Please edit documentation in R/discretize.R
 \name{discretize}
 \alias{discretize}
-\title{Discretize badly}
+\title{Discretize, not too badly}
 \usage{
-discretize(x, ..., draw = TRUE)
+discretize(x, nrow = 50, ncol = 30, ..., draw = TRUE)
 }
 \arguments{
 \item{x}{object decomposable to segments}
@@ -21,6 +21,9 @@ Low memory and low performance and error-prone version of fasterize.
 library(raster)
 library(silicate)
 sc <- SC(inlandwaters)
-x <- filter(sc, object_ == sample(sc$object$object_, 1))
-discretize(x)
+x <- sc #filter(sc, object_ == sample(sc$object$object_, 3))
+discretize(x, 1500, 1300)
+
+
+discretize(SC0(minimal_mesh), 550, 550)
 }
